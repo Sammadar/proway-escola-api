@@ -13,7 +13,8 @@ dependencies = [
 
 [tool.poetry]
 packages = [{include = "escola_api", from = "src"}]
-
+# poetry lock
+# poetry add dataclasses-json
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
