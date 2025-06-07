@@ -7,30 +7,17 @@ from src.escola_api.database.banco_dados import SessionLocal
 from src.escola_api.database.modelos import CursoEntidade
 from src.escola_api.schemas.curso_schemas import Curso, CursoCadastro, CursoEditar
 
-cursos = [
-    # instanciando um objeto da classe Curso
-    Curso(id=1, nome="Python Web", sigla="PY1"),
-    Curso(id=2, nome="Git e GitHub", sigla="GT")
-]
 
-
-# Função de dependencia para obter uma sessão do banco de dados
-def get_db():
-    db = SessionLocal()  # Criar uma nova sessão do banco de dados
-    try:
-        yield db  # Retorna a sessão de forma que o FastAPI possa utiliza-la nas rotas
-    finally:
-        db.close()  # Garante que a sessão será fechada após o uso
 
 
 # localhost:8000/docs
-@router.get("/api/cursos")
+@router.get("/api/cursos", tags=["cursos"])
 def listar_todos_cursos(db: Session = Depends(get_db)):
     cursos = db.query(CursoEntidade).all()
     return cursos
 
 
-@router.get("/api/cursos/{id}")
+@router.get("/api/cursos/{id}", tags=["cursos"])
 def obter_por_id_curso(id: int, db: Session = Depends(get_db)):
     curso = db.query(CursoEntidade).filter(CursoEntidade.id == id).first()
     if curso:
@@ -46,7 +33,7 @@ def obter_por_id_curso(id: int, db: Session = Depends(get_db)):
 # U => update   => Método put
 # D => delete   => Método delete
 
-@router.post("/api/cursos")
+@router.post("/api/cursos", tags=["cursos"])
 def cadastrar_curso(form: CursoCadastro, db: Session = Depends(get_db)):
     # instanciar um objeto da classe Curso
     curso = CursoEntidade(nome=form.nome, sigla=form.sigla)
@@ -57,7 +44,7 @@ def cadastrar_curso(form: CursoCadastro, db: Session = Depends(get_db)):
     return curso
 
 
-@router.delete("/api/cursos/{id}", status_code=204)
+@router.delete("/api/cursos/{id}", status_code=204, tags=["cursos"])
 def apagar_curso(id: int, db: Session = Depends(get_db)):
     curso = db.query(CursoEntidade).filter(CursoEntidade.id == id).first()
     if curso:
@@ -67,7 +54,7 @@ def apagar_curso(id: int, db: Session = Depends(get_db)):
     raise HTTPException(status_code=404, detail=f"Curso não encontrado com id: {id}")
 
 
-@router.put("/api/cursos/{id}", status_code=200)
+@router.put("/api/cursos/{id}", status_code=200, tags=["cursos"])
 def editar_curso(id: int, form: CursoEditar, db: Session = Depends(get_db)):
         curso = db.query(CursoEntidade).filter(CursoEntidade.id == id).first()
         if curso:

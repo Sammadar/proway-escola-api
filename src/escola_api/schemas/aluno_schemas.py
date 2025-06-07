@@ -10,6 +10,9 @@ class Aluno(BaseModel):
     cpf: str = Field()
     data_nascimento: datetime = Field(alias="dataNascimento")
 
+    class Config:
+        populate_by_name = True
+        allow_population_by_field_name = True
 
 class AlunoCadastro(BaseModel):
     nome: str = Field()
