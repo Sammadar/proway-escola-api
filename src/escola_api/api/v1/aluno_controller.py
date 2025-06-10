@@ -1,9 +1,11 @@
-from src.escola_api.database.modelos import AlunoEntidade
-from src.escola_api.schemas.aluno_schemas import Aluno, AlunoEditar, AlunoCadastro
-from src.escola_api.app import router
-from datetime import  date
 from fastapi import HTTPException
-from src.escola_api.database.banco_dados import SessionLocal
+from fastapi.params import Depends
+from sqlalchemy.orm import Session
+
+from src.escola_api.app import router
+from src.escola_api.database.modelos import AlunoEntidade
+from src.escola_api.dependencias import get_db
+from src.escola_api.schemas.aluno_schemas import Aluno, AlunoEditar, AlunoCadastro
 
 
 @router.get("/api/alunos", tags=["alunos"])
@@ -14,30 +16,30 @@ def listar_todos_alunos(db: Session = Depends(get_db)):
         nome=aluno.nome,
         sobrenome=aluno.sobrenome,
         cpf=aluno.cpf,
-        data_nascimento=aluno.data_nascimento) for aluno in alunos]
+        data_nascimento=aluno.data_nascimento,
+    ) for aluno in alunos]
     return alunos_response
 
 
 @router.get("/api/alunos/{id}", tags=["alunos"])
-def obter_por_id_alunos(id: int):
+def obter_por_id_alunos(id: int, db: Session = Depends(get_db)):
     aluno = db.query(AlunoEntidade).filter(AlunoEntidade.id == id).first()
     if aluno:
         return Aluno(
-        id=aluno.id,
-        nome=aluno.nome,
-        sobrenome=aluno.sobrenome,
-        cpf=aluno.cpf,
-        data_nascimento=aluno.data_nascimento,
+            id=aluno.id,
+            nome=aluno.nome,
+            sobrenome=aluno.sobrenome,
+            cpf=aluno.cpf,
+            data_nascimento=aluno.data_nascimento,
         )
-
     # Lançando uma exceção com o status code de 404(não encontrado)
     raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
 
 
 @router.post("/api/alunos", tags=["alunos"])
 def cadastrar_aluno(form: AlunoCadastro, db: Session = Depends(get_db)):
-    # Instanciar um objeto da classe AlunoEntidade
-    aluno = AlunoEntidade (
+    # instanciar um objeto da classe AlunoEntidade
+    aluno = AlunoEntidade(
         nome=form.nome,
         sobrenome=form.sobrenome,
         cpf=form.cpf,
@@ -52,7 +54,7 @@ def cadastrar_aluno(form: AlunoCadastro, db: Session = Depends(get_db)):
 
 @router.delete("/api/alunos/{id}", status_code=204, tags=["alunos"])
 def apagar_aluno(id: int, db: Session = Depends(get_db)):
-    aluno = db.query(AlunoEntidade).filter(Aluno.id == id).first()
+    aluno = db.query(AlunoEntidade).filter(AlunoEntidade.id == id).first()
     if aluno:
         db.delete(aluno)
         db.commit()
@@ -62,13 +64,13 @@ def apagar_aluno(id: int, db: Session = Depends(get_db)):
 
 @router.put("/api/alunos/{id}", tags=["alunos"])
 def editar_aluno(id: int, form: AlunoEditar, db: Session = Depends(get_db)):
-    aluno = db.query(AlunoEntidade).filter(Aluno.id == id).first()
+    aluno = db.query(AlunoEntidade).filter(AlunoEntidade.id == id).first()
     if aluno:
-            aluno.nome = form.nome
-            aluno.sobrenome = form.sobrenome
-            aluno.cpf = form.cpf
-            aluno.data_nascimento = form.data_nascimento
-            db.commit()
-            db.refresh(aluno)
-            return aluno
+        aluno.nome = form.nome
+        aluno.sobrenome = form.sobrenome
+        aluno.cpf = form.cpf
+        aluno.data_nascimento = form.data_nascimento
+        db.commit()
+        db.refresh(aluno)
+        return aluno
     raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
