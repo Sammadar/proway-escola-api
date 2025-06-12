@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String, Date
-from sqlalchemy import ForeignKey
+from datetime import date
+
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
 
 from src.escola_api.database.banco_dados import Base
-from datetime import date
+
 
 class CursoEntidade(Base):
     __tablename__ = "cursos"
@@ -15,9 +16,14 @@ class CursoEntidade(Base):
     matriculas = relationship("MatriculaEntidade", back_populates="curso")
 
 
+# from datetime import datetime
+# from sqlalchemy import Column, Integer, String, DateTime
+# from src.escola_api.database.banco_dados import Base
+
 class AlunoEntidade(Base):
     __tablename__ = "alunos"
-    id = Column(Integer, primary_key=True, index=True)
+
+    id: int = Column(Integer, primary_key=True, index=True)
     nome: str = Column(String(20), nullable=False)
     sobrenome: str = Column(String(50), nullable=False)
     cpf: str = Column(String(14), nullable=False)
@@ -25,15 +31,16 @@ class AlunoEntidade(Base):
 
     matriculas = relationship("MatriculaEntidade", back_populates="aluno")
 
+
 class MatriculaEntidade(Base):
     __tablename__ = "matriculas"
 
     id: int = Column(Integer, primary_key=True, index=True)
-    aluno_id: int = Column(Integer, ForeignKey("alunos.id"),nullable=False)
-    curso_id: int = Column(Integer, ForeignKey(CursoEntidade.id),nullable=False)
+    aluno_id: int = Column(Integer, ForeignKey("alunos.id"), nullable=False)
+    curso_id: int = Column(Integer, ForeignKey(CursoEntidade.id), nullable=False)
     data_matricula: date = Column(Date, nullable=False, default=date.today)
 
-    # Relacionamento permite acessar m.aluno e m.curso
+    # Relacionamentos permite acessar m.aluno e m.curso
     # lazy="select":
     # Carregamento “lazy” padrão. Não faz JOIN na query inicial;
     # ao acessar m.aluno, executa um SELECT separado.
